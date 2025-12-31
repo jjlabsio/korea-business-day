@@ -21,12 +21,12 @@ export const isTradingDay = (date: string): boolean => {
  * @param count - 몇 번째 개장일인지 (기본값: 1)
  * @returns N번째 다음 개장일 날짜 (YYYY-MM-DD 형식)
  * @example
- * nextTradingDay('2024-01-01'); // '2024-01-02' (신정 다음 첫 번째 개장일)
- * nextTradingDay('2024-01-01', 2); // '2024-01-03' (신정 다음 두 번째 개장일)
- * nextTradingDay('2024-12-29', 3); // '2025-01-06' (연말특별휴무 다음 세 번째 개장일)
- * nextTradingDay('2024-05-03', 5); // '2024-05-13' (어린이날 연휴 다음 다섯 번째 개장일)
+ * getNextTradingDay('2024-01-01'); // '2024-01-02' (신정 다음 첫 번째 개장일)
+ * getNextTradingDay('2024-01-01', 2); // '2024-01-03' (신정 다음 두 번째 개장일)
+ * getNextTradingDay('2024-12-29', 3); // '2025-01-06' (연말특별휴무 다음 세 번째 개장일)
+ * getNextTradingDay('2024-05-03', 5); // '2024-05-13' (어린이날 연휴 다음 다섯 번째 개장일)
  */
-export const nextTradingDay = (date: string, count: number = 1): string => {
+export const getNextTradingDay = (date: string, count: number = 1): string => {
   if (count <= 0) {
     throw new Error("count must be a positive number");
   }
@@ -56,12 +56,15 @@ export const nextTradingDay = (date: string, count: number = 1): string => {
  * @param count - 몇 번째 개장일인지 (기본값: 1)
  * @returns N번째 이전 개장일 날짜 (YYYY-MM-DD 형식)
  * @example
- * previousTradingDay('2024-01-02'); // '2023-12-29' (신정 이전 첫 번째 개장일)
- * previousTradingDay('2024-01-08', 2); // '2024-01-04' (월요일 이전 두 번째 개장일)
- * previousTradingDay('2025-01-06', 3); // '2024-12-27' (연말 이전 세 번째 개장일)
- * previousTradingDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 개장일)
+ * getPreviousTradingDay('2024-01-02'); // '2023-12-29' (신정 이전 첫 번째 개장일)
+ * getPreviousTradingDay('2024-01-08', 2); // '2024-01-04' (월요일 이전 두 번째 개장일)
+ * getPreviousTradingDay('2025-01-06', 3); // '2024-12-27' (연말 이전 세 번째 개장일)
+ * getPreviousTradingDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 개장일)
  */
-export const previousTradingDay = (date: string, count: number = 1): string => {
+export const getPreviousTradingDay = (
+  date: string,
+  count: number = 1
+): string => {
   if (count <= 0) {
     throw new Error("count must be a positive number");
   }
@@ -91,11 +94,11 @@ export const previousTradingDay = (date: string, count: number = 1): string => {
  * @param date - 기준 날짜 (YYYY-MM-DD 형식)
  * @returns 가장 최근 거래일 (YYYY-MM-DD 형식)
  * @example
- * lastTradingDay('2026-01-02'); // '2026-01-02' (금요일, 거래일)
- * lastTradingDay('2026-01-01'); // '2025-12-30' (신정은 휴무, 31일은 휴장일, 이전 거래일)
- * lastTradingDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
+ * getLastTradingDay('2026-01-02'); // '2026-01-02' (금요일, 거래일)
+ * getLastTradingDay('2026-01-01'); // '2025-12-30' (신정은 휴무, 31일은 휴장일, 이전 거래일)
+ * getLastTradingDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
  */
-export const lastTradingDay = (date: string): string => {
+export const getLastTradingDay = (date: string): string => {
   // 주어진 날짜가 거래일이면 그대로 반환
   if (isTradingDay(date)) {
     return date;

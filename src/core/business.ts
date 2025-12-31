@@ -20,12 +20,12 @@ export const isBusinessDay = (date: string): boolean => {
  * @param count - 몇 번째 영업일인지 (기본값: 1)
  * @returns N번째 다음 영업일 날짜 (YYYY-MM-DD 형식)
  * @example
- * nextBusinessDay('2024-01-01'); // '2024-01-02' (신정 다음 첫 번째 영업일)
- * nextBusinessDay('2024-01-01', 2); // '2024-01-03' (신정 다음 두 번째 영업일)
- * nextBusinessDay('2024-01-05', 3); // '2024-01-10' (금요일 다음 세 번째 영업일)
- * nextBusinessDay('2024-12-31', 5); // '2025-01-08' (연말연시 다음 다섯 번째 영업일)
+ * getNextBusinessDay('2024-01-01'); // '2024-01-02' (신정 다음 첫 번째 영업일)
+ * getNextBusinessDay('2024-01-01', 2); // '2024-01-03' (신정 다음 두 번째 영업일)
+ * getNextBusinessDay('2024-01-05', 3); // '2024-01-10' (금요일 다음 세 번째 영업일)
+ * getNextBusinessDay('2024-12-31', 5); // '2025-01-08' (연말연시 다음 다섯 번째 영업일)
  */
-export const nextBusinessDay = (date: string, count: number = 1): string => {
+export const getNextBusinessDay = (date: string, count: number = 1): string => {
   if (count <= 0) {
     throw new Error("count must be a positive number");
   }
@@ -55,12 +55,12 @@ export const nextBusinessDay = (date: string, count: number = 1): string => {
  * @param count - 몇 번째 영업일인지 (기본값: 1)
  * @returns N번째 이전 영업일 날짜 (YYYY-MM-DD 형식)
  * @example
- * previousBusinessDay('2024-01-02'); // '2023-12-29' (신정 이전 첫 번째 영업일)
- * previousBusinessDay('2024-01-08', 2); // '2024-01-04' (월요일 이전 두 번째 영업일)
- * previousBusinessDay('2024-03-04', 3); // '2024-02-27' (삼일절 대체휴일 이전 세 번째 영업일)
- * previousBusinessDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 영업일)
+ * getPreviousBusinessDay('2024-01-02'); // '2023-12-29' (신정 이전 첫 번째 영업일)
+ * getPreviousBusinessDay('2024-01-08', 2); // '2024-01-04' (월요일 이전 두 번째 영업일)
+ * getPreviousBusinessDay('2024-03-04', 3); // '2024-02-27' (삼일절 대체휴일 이전 세 번째 영업일)
+ * getPreviousBusinessDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 영업일)
  */
-export const previousBusinessDay = (
+export const getPreviousBusinessDay = (
   date: string,
   count: number = 1
 ): string => {
@@ -93,11 +93,11 @@ export const previousBusinessDay = (
  * @param date - 기준 날짜 (YYYY-MM-DD 형식)
  * @returns 가장 최근 영업일 (YYYY-MM-DD 형식)
  * @example
- * lastBusinessDay('2026-01-02'); // '2025-01-02' (금요일, 영업일)
- * lastBusinessDay('2026-01-01'); // '2025-12-31' (신정은 공휴일, 이전 영업일)
- * lastBusinessDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
+ * getLastBusinessDay('2026-01-02'); // '2025-01-02' (금요일, 영업일)
+ * getLastBusinessDay('2026-01-01'); // '2025-12-31' (신정은 공휴일, 이전 영업일)
+ * getLastBusinessDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
  */
-export const lastBusinessDay = (date: string): string => {
+export const getLastBusinessDay = (date: string): string => {
   // 주어진 날짜가 영업일이면 그대로 반환
   if (isBusinessDay(date)) {
     return date;
