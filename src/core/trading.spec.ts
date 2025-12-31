@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isTradingDay, nextTradingDay, previousTradingDay } from "./trading.ts";
+import {
+  isTradingDay,
+  lastTradingDay,
+  nextTradingDay,
+  previousTradingDay,
+} from "./trading.ts";
 
 describe("trading", () => {
   describe("isTradingDay", () => {
@@ -79,9 +84,15 @@ describe("trading", () => {
       });
 
       it("잘못된 count 값에 대해 에러를 발생시켜야 함", () => {
-        expect(() => nextTradingDay("2025-08-25", 0)).toThrow("count must be a positive number");
-        expect(() => nextTradingDay("2025-08-25", -1)).toThrow("count must be a positive number");
-        expect(() => nextTradingDay("2025-08-25", -5)).toThrow("count must be a positive number");
+        expect(() => nextTradingDay("2025-08-25", 0)).toThrow(
+          "count must be a positive number"
+        );
+        expect(() => nextTradingDay("2025-08-25", -1)).toThrow(
+          "count must be a positive number"
+        );
+        expect(() => nextTradingDay("2025-08-25", -5)).toThrow(
+          "count must be a positive number"
+        );
       });
     });
   });
@@ -142,10 +153,30 @@ describe("trading", () => {
       });
 
       it("잘못된 count 값에 대해 에러를 발생시켜야 함", () => {
-        expect(() => previousTradingDay("2025-08-25", 0)).toThrow("count must be a positive number");
-        expect(() => previousTradingDay("2025-08-25", -1)).toThrow("count must be a positive number");
-        expect(() => previousTradingDay("2025-08-25", -5)).toThrow("count must be a positive number");
+        expect(() => previousTradingDay("2025-08-25", 0)).toThrow(
+          "count must be a positive number"
+        );
+        expect(() => previousTradingDay("2025-08-25", -1)).toThrow(
+          "count must be a positive number"
+        );
+        expect(() => previousTradingDay("2025-08-25", -5)).toThrow(
+          "count must be a positive number"
+        );
       });
+    });
+  });
+
+  describe("lastTradingDay", () => {
+    it("거래일이면 그대로 반환해야 함", () => {
+      expect(lastTradingDay("2026-01-02")).toEqual("2026-01-02"); // 금요일, 거래일
+    });
+
+    it("거래소 휴무일이면 이전 거래일을 반환해야 함", () => {
+      expect(lastTradingDay("2026-01-01")).toEqual("2025-12-30"); // 신정은 휴무, 31은 휴장일, 이전 거래일
+    });
+
+    it("주말이면 이전 거래일을 반환해야 함", () => {
+      expect(lastTradingDay("2026-01-10")).toEqual("2026-01-09"); // 토요일 → 금요일
     });
   });
 

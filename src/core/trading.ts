@@ -28,7 +28,7 @@ export const isTradingDay = (date: string): boolean => {
  */
 export const nextTradingDay = (date: string, count: number = 1): string => {
   if (count <= 0) {
-    throw new Error('count must be a positive number');
+    throw new Error("count must be a positive number");
   }
 
   const d = toDate(date);
@@ -41,7 +41,7 @@ export const nextTradingDay = (date: string, count: number = 1): string => {
     if (isTradingDay(toDateString(d))) {
       foundCount++;
     }
-    
+
     if (foundCount < count) {
       d.setUTCDate(d.getUTCDate() + 1);
     }
@@ -63,7 +63,7 @@ export const nextTradingDay = (date: string, count: number = 1): string => {
  */
 export const previousTradingDay = (date: string, count: number = 1): string => {
   if (count <= 0) {
-    throw new Error('count must be a positive number');
+    throw new Error("count must be a positive number");
   }
 
   const d = toDate(date);
@@ -76,10 +76,39 @@ export const previousTradingDay = (date: string, count: number = 1): string => {
     if (isTradingDay(toDateString(d))) {
       foundCount++;
     }
-    
+
     if (foundCount < count) {
       d.setUTCDate(d.getUTCDate() - 1);
     }
+  }
+
+  return toDateString(d);
+};
+
+/**
+ * 주어진 날짜를 기준으로 가장 최근 거래일을 반환합니다
+ * 주어진 날짜가 거래일이면 그대로 반환하고, 아니면 가장 최근의 거래일을 반환합니다
+ * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @returns 가장 최근 거래일 (YYYY-MM-DD 형식)
+ * @example
+ * lastTradingDay('2026-01-02'); // '2026-01-02' (금요일, 거래일)
+ * lastTradingDay('2026-01-01'); // '2025-12-30' (신정은 휴무, 31일은 휴장일, 이전 거래일)
+ * lastTradingDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
+ */
+export const lastTradingDay = (date: string): string => {
+  // 주어진 날짜가 거래일이면 그대로 반환
+  if (isTradingDay(date)) {
+    return date;
+  }
+
+  // 거래일이 아니면 이전 거래일 찾기
+  const d = toDate(date);
+
+  // 이전 날부터 시작
+  d.setUTCDate(d.getUTCDate() - 1);
+
+  while (!isTradingDay(toDateString(d))) {
+    d.setUTCDate(d.getUTCDate() - 1);
   }
 
   return toDateString(d);
