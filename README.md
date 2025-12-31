@@ -29,9 +29,11 @@ import {
   isBusinessDay,
   nextBusinessDay,
   previousBusinessDay,
+  lastBusinessDay,
   isTradingDay,
   nextTradingDay,
   previousTradingDay,
+  lastTradingDay,
   isHoliday,
   isTradingHoliday,
 } from "korea-business-day";
@@ -88,6 +90,18 @@ console.log(previousBusinessDay("2025-01-06")); // '2025-01-03' (월요일 이�
 console.log(previousBusinessDay("2025-03-04", 3)); // '2025-02-26' (삼일절 대체휴일 이전 세 번째 영업일)
 ```
 
+#### `lastBusinessDay(date: string): string`
+
+주어진 날짜를 기준으로 가장 최근 영업일을 반환합니다. 주어진 날짜가 영업일이면 그대로 반환하고, 아니면 가장 최근의 영업일을 반환합니다.
+
+```typescript
+import { lastBusinessDay } from "korea-business-day/business";
+
+console.log(lastBusinessDay("2026-01-02")); // '2026-01-02' (금요일, 영업일)
+console.log(lastBusinessDay("2026-01-01")); // '2025-12-31' (신정은 공휴일, 이전 영업일)
+console.log(lastBusinessDay("2026-01-10")); // '2026-01-09' (토요일 → 금요일)
+```
+
 #### `isTradingDay(date: string): boolean`
 
 주어진 날짜가 주식시장 개장일인지 판단합니다.
@@ -124,6 +138,18 @@ console.log(previousTradingDay("2025-01-02")); // '2024-12-30' (신정 이전 �
 console.log(previousTradingDay("2025-01-08", 2)); // '2025-01-03' (월요일 이전 두 번째 개장일)
 console.log(previousTradingDay("2025-05-07")); // '2025-05-02' (어린이날 연휴 이전 개장일)
 console.log(previousTradingDay("2025-05-07", 5)); // '2025-04-30' (어린이날 연휴 이전 다섯 번째 개장일)
+```
+
+#### `lastTradingDay(date: string): string`
+
+주어진 날짜를 기준으로 가장 최근 거래일을 반환합니다. 주어진 날짜가 거래일이면 그대로 반환하고, 아니면 가장 최근의 거래일을 반환합니다.
+
+```typescript
+import { lastTradingDay } from "korea-business-day/business";
+
+console.log(lastTradingDay("2026-01-02")); // '2026-01-02' (금요일, 거래일)
+console.log(lastTradingDay("2026-01-01")); // '2025-12-30' (신정은 휴무, 31일은 휴장일, 이전 거래일)
+console.log(lastTradingDay("2026-01-10")); // '2026-01-09' (토요일 → 금요일)
 ```
 
 ### Holiday 모듈
