@@ -27,7 +27,7 @@ export const isBusinessDay = (date: string): boolean => {
  */
 export const nextBusinessDay = (date: string, count: number = 1): string => {
   if (count <= 0) {
-    throw new Error('count must be a positive number');
+    throw new Error("count must be a positive number");
   }
 
   const d = toDate(date);
@@ -40,7 +40,7 @@ export const nextBusinessDay = (date: string, count: number = 1): string => {
     if (isBusinessDay(toDateString(d))) {
       foundCount++;
     }
-    
+
     if (foundCount < count) {
       d.setUTCDate(d.getUTCDate() + 1);
     }
@@ -60,9 +60,12 @@ export const nextBusinessDay = (date: string, count: number = 1): string => {
  * previousBusinessDay('2024-03-04', 3); // '2024-02-27' (삼일절 대체휴일 이전 세 번째 영업일)
  * previousBusinessDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 영업일)
  */
-export const previousBusinessDay = (date: string, count: number = 1): string => {
+export const previousBusinessDay = (
+  date: string,
+  count: number = 1
+): string => {
   if (count <= 0) {
-    throw new Error('count must be a positive number');
+    throw new Error("count must be a positive number");
   }
 
   const d = toDate(date);
@@ -75,10 +78,39 @@ export const previousBusinessDay = (date: string, count: number = 1): string => 
     if (isBusinessDay(toDateString(d))) {
       foundCount++;
     }
-    
+
     if (foundCount < count) {
       d.setUTCDate(d.getUTCDate() - 1);
     }
+  }
+
+  return toDateString(d);
+};
+
+/**
+ * 주어진 날짜를 기준으로 가장 최근 영업일을 반환합니다
+ * 주어진 날짜가 영업일이면 그대로 반환하고, 아니면 가장 최근의 영업일을 반환합니다
+ * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @returns 가장 최근 영업일 (YYYY-MM-DD 형식)
+ * @example
+ * lastBusinessDay('2026-01-02'); // '2025-01-02' (금요일, 영업일)
+ * lastBusinessDay('2026-01-01'); // '2025-12-31' (신정은 공휴일, 이전 영업일)
+ * lastBusinessDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
+ */
+export const lastBusinessDay = (date: string): string => {
+  // 주어진 날짜가 영업일이면 그대로 반환
+  if (isBusinessDay(date)) {
+    return date;
+  }
+
+  // 영업일이 아니면 이전 영업일 찾기
+  const d = toDate(date);
+
+  // 이전 날부터 시작
+  d.setUTCDate(d.getUTCDate() - 1);
+
+  while (!isBusinessDay(toDateString(d))) {
+    d.setUTCDate(d.getUTCDate() - 1);
   }
 
   return toDateString(d);

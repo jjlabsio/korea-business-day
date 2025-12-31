@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isBusinessDay,
+  lastBusinessDay,
   nextBusinessDay,
   previousBusinessDay,
 } from "./business.ts";
@@ -140,6 +141,20 @@ describe("business", () => {
         expect(() => previousBusinessDay("2025-08-25", -1)).toThrow("count must be a positive number");
         expect(() => previousBusinessDay("2025-08-25", -5)).toThrow("count must be a positive number");
       });
+    });
+  });
+
+  describe("lastBusinessDay", () => {
+    it("영업일이면 그대로 반환해야 함", () => {
+      expect(lastBusinessDay("2026-01-02")).toEqual("2026-01-02"); // 금요일, 영업일
+    });
+
+    it("공휴일이면 이전 영업일을 반환해야 함", () => {
+      expect(lastBusinessDay("2026-01-01")).toEqual("2025-12-31"); // 신정은 공휴일, 이전 영업일
+    });
+
+    it("주말이면 이전 영업일을 반환해야 함", () => {
+      expect(lastBusinessDay("2026-01-10")).toEqual("2026-01-09"); // 토요일 → 금요일
     });
   });
 
