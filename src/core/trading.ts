@@ -1,5 +1,6 @@
-import { toDate, toDateString, isWeekend } from "./date-utils.ts";
+import { isWeekend, kstMidnightToUtc, toKstString } from "./date-utils.ts";
 import { isTradingHoliday } from "./holiday.ts";
+import { addDays, subDays } from "date-fns";
 
 /**
  * 주어진 날짜가 한국 주식시장 개장일인지 판단합니다 (주말 및 거래소 휴무일 제외)
@@ -31,23 +32,19 @@ export const getNextTradingDay = (date: string, count: number = 1): string => {
     throw new Error("count must be a positive number");
   }
 
-  const d = toDate(date);
+  let d = kstMidnightToUtc(date);
   let foundCount = 0;
 
-  // 다음 날부터 시작
-  d.setUTCDate(d.getUTCDate() + 1);
-
   while (foundCount < count) {
-    if (isTradingDay(toDateString(d))) {
-      foundCount++;
-    }
+    d = addDays(d, 1);
+    const kstString = toKstString(d);
 
-    if (foundCount < count) {
-      d.setUTCDate(d.getUTCDate() + 1);
+    if (isTradingDay(kstString)) {
+      foundCount++;
     }
   }
 
-  return toDateString(d);
+  return toKstString(d);
 };
 
 /**
@@ -69,23 +66,19 @@ export const getPreviousTradingDay = (
     throw new Error("count must be a positive number");
   }
 
-  const d = toDate(date);
+  let d = kstMidnightToUtc(date);
   let foundCount = 0;
 
-  // 이전 날부터 시작
-  d.setUTCDate(d.getUTCDate() - 1);
-
   while (foundCount < count) {
-    if (isTradingDay(toDateString(d))) {
-      foundCount++;
-    }
+    d = subDays(d, 1);
+    const kstString = toKstString(d);
 
-    if (foundCount < count) {
-      d.setUTCDate(d.getUTCDate() - 1);
+    if (isTradingDay(kstString)) {
+      foundCount++;
     }
   }
 
-  return toDateString(d);
+  return toKstString(d);
 };
 
 /**
@@ -104,15 +97,12 @@ export const getLastTradingDay = (date: string): string => {
     return date;
   }
 
-  // 거래일이 아니면 이전 거래일 찾기
-  const d = toDate(date);
+  let d = kstMidnightToUtc(date);
+  d = subDays(d, 1);
 
-  // 이전 날부터 시작
-  d.setUTCDate(d.getUTCDate() - 1);
-
-  while (!isTradingDay(toDateString(d))) {
-    d.setUTCDate(d.getUTCDate() - 1);
+  while (!isTradingDay(toKstString(d))) {
+    d = subDays(d, 1);
   }
 
-  return toDateString(d);
+  return toKstString(d);
 };
