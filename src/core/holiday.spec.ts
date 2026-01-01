@@ -17,6 +17,26 @@ describe("holiday", () => {
     it("지원하지 않는 연도에 대해서는 false를 반환해야 함", () => {
       expect(isHoliday("2021-12-25")).toEqual(false); // 2021년 데이터 없음
     });
+
+    describe("다양한 포맷 지원", () => {
+      it("유럽식 포맷 (dd/MM/yyyy)", () => {
+        expect(isHoliday("01/01/2025", "dd/MM/yyyy")).toEqual(true); // 신정
+        expect(isHoliday("15/08/2025", "dd/MM/yyyy")).toEqual(true); // 광복절
+        expect(isHoliday("25/08/2025", "dd/MM/yyyy")).toEqual(false); // 평일
+      });
+
+      it("미국식 포맷 (MM-dd-yyyy)", () => {
+        expect(isHoliday("01-01-2025", "MM-dd-yyyy")).toEqual(true); // 신정
+        expect(isHoliday("08-15-2025", "MM-dd-yyyy")).toEqual(true); // 광복절
+        expect(isHoliday("08-25-2025", "MM-dd-yyyy")).toEqual(false); // 평일
+      });
+
+      it("숫자만 포맷 (yyyyMMdd)", () => {
+        expect(isHoliday("20250101", "yyyyMMdd")).toEqual(true); // 신정
+        expect(isHoliday("20250815", "yyyyMMdd")).toEqual(true); // 광복절
+        expect(isHoliday("20250825", "yyyyMMdd")).toEqual(false); // 평일
+      });
+    });
   });
 
   describe("isTradingHoliday", () => {
@@ -33,6 +53,26 @@ describe("holiday", () => {
 
     it("지원하지 않는 연도에 대해서는 false를 반환해야 함", () => {
       expect(isTradingHoliday("2021-12-31")).toEqual(false); // 2021년 데이터 없음
+    });
+
+    describe("다양한 포맷 지원", () => {
+      it("유럽식 포맷 (dd/MM/yyyy)", () => {
+        expect(isTradingHoliday("01/01/2025", "dd/MM/yyyy")).toEqual(true); // 신정
+        expect(isTradingHoliday("31/12/2025", "dd/MM/yyyy")).toEqual(true); // 연말휴장일
+        expect(isTradingHoliday("25/08/2025", "dd/MM/yyyy")).toEqual(false); // 평일
+      });
+
+      it("미국식 포맷 (MM-dd-yyyy)", () => {
+        expect(isTradingHoliday("01-01-2025", "MM-dd-yyyy")).toEqual(true); // 신정
+        expect(isTradingHoliday("12-31-2025", "MM-dd-yyyy")).toEqual(true); // 연말휴장일
+        expect(isTradingHoliday("08-25-2025", "MM-dd-yyyy")).toEqual(false); // 평일
+      });
+
+      it("숫자만 포맷 (yyyyMMdd)", () => {
+        expect(isTradingHoliday("20250101", "yyyyMMdd")).toEqual(true); // 신정
+        expect(isTradingHoliday("20251231", "yyyyMMdd")).toEqual(true); // 연말휴장일
+        expect(isTradingHoliday("20250825", "yyyyMMdd")).toEqual(false); // 평일
+      });
     });
   });
 
