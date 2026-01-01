@@ -26,6 +26,23 @@ describe("business", () => {
       expect(isBusinessDay("2025-08-28")).toEqual(true); // 목요일
       expect(isBusinessDay("2025-08-29")).toEqual(true); // 금요일
     });
+
+    describe("with format parameter", () => {
+      it("미국식 날짜 포맷(MM/dd/yyyy)을 처리해야 함", () => {
+        expect(isBusinessDay("01/02/2024", "MM/dd/yyyy")).toEqual(true); // 화요일, 영업일
+        expect(isBusinessDay("01/01/2024", "MM/dd/yyyy")).toEqual(false); // 신정
+      });
+
+      it("유럽식 날짜 포맷(dd/MM/yyyy)을 처리해야 함", () => {
+        expect(isBusinessDay("02/01/2024", "dd/MM/yyyy")).toEqual(true); // 2024-01-02, 화요일
+        expect(isBusinessDay("06/01/2024", "dd/MM/yyyy")).toEqual(false); // 2024-01-06, 토요일
+      });
+
+      it("점 구분자 포맷(yyyy.MM.dd)을 처리해야 함", () => {
+        expect(isBusinessDay("2024.01.02", "yyyy.MM.dd")).toEqual(true); // 화요일
+        expect(isBusinessDay("2025.03.03", "yyyy.MM.dd")).toEqual(false); // 삼일절 대체휴일
+      });
+    });
   });
 
   describe("getNextBusinessDay", () => {
@@ -88,6 +105,23 @@ describe("business", () => {
         expect(() => getNextBusinessDay("2025-08-25", -5)).toThrow(
           "count must be a positive number"
         );
+      });
+    });
+
+    describe("with format parameter", () => {
+      it("미국식 포맷으로 입출력해야 함", () => {
+        expect(getNextBusinessDay("01/01/2024", 1, "MM/dd/yyyy")).toEqual("01/02/2024"); // 신정 → 다음 영업일
+        expect(getNextBusinessDay("08/29/2025", 1, "MM/dd/yyyy")).toEqual("09/01/2025"); // 금요일 → 월요일
+      });
+
+      it("유럽식 포맷으로 입출력해야 함", () => {
+        expect(getNextBusinessDay("01/01/2024", 1, "dd/MM/yyyy")).toEqual("02/01/2024"); // 신정 → 다음 영업일
+        expect(getNextBusinessDay("29/08/2025", 2, "dd/MM/yyyy")).toEqual("02/09/2025"); // 금요일 → 화요일
+      });
+
+      it("점 구분자 포맷으로 count와 함께 사용해야 함", () => {
+        expect(getNextBusinessDay("2025.08.29", 3, "yyyy.MM.dd")).toEqual("2025.09.03"); // 금요일 → 수요일
+        expect(getNextBusinessDay("2025.01.01", 5, "yyyy.MM.dd")).toEqual("2025.01.08"); // 신정 → 5번째 영업일
       });
     });
   });
@@ -154,6 +188,23 @@ describe("business", () => {
         );
       });
     });
+
+    describe("with format parameter", () => {
+      it("미국식 포맷으로 입출력해야 함", () => {
+        expect(getPreviousBusinessDay("01/02/2025", 1, "MM/dd/yyyy")).toEqual("12/31/2024"); // 신정 다음 → 이전 영업일
+        expect(getPreviousBusinessDay("09/01/2025", 1, "MM/dd/yyyy")).toEqual("08/29/2025"); // 월요일 → 금요일
+      });
+
+      it("유럽식 포맷으로 입출력해야 함", () => {
+        expect(getPreviousBusinessDay("02/01/2025", 1, "dd/MM/yyyy")).toEqual("31/12/2024"); // 신정 다음 → 이전 영업일
+        expect(getPreviousBusinessDay("27/08/2025", 2, "dd/MM/yyyy")).toEqual("25/08/2025"); // 수요일 → 월요일
+      });
+
+      it("점 구분자 포맷으로 count와 함께 사용해야 함", () => {
+        expect(getPreviousBusinessDay("2025.09.01", 3, "yyyy.MM.dd")).toEqual("2025.08.27"); // 월요일 → 수요일
+        expect(getPreviousBusinessDay("2025.01.08", 5, "yyyy.MM.dd")).toEqual("2024.12.31"); // 5번째 이전 영업일
+      });
+    });
   });
 
   describe("getLastBusinessDay", () => {
@@ -167,6 +218,23 @@ describe("business", () => {
 
     it("주말이면 이전 영업일을 반환해야 함", () => {
       expect(getLastBusinessDay("2026-01-10")).toEqual("2026-01-09"); // 토요일 → 금요일
+    });
+
+    describe("with format parameter", () => {
+      it("미국식 포맷으로 입출력해야 함", () => {
+        expect(getLastBusinessDay("01/02/2026", "MM/dd/yyyy")).toEqual("01/02/2026"); // 금요일, 영업일
+        expect(getLastBusinessDay("01/01/2026", "MM/dd/yyyy")).toEqual("12/31/2025"); // 신정 → 이전 영업일
+      });
+
+      it("유럽식 포맷으로 입출력해야 함", () => {
+        expect(getLastBusinessDay("02/01/2026", "dd/MM/yyyy")).toEqual("02/01/2026"); // 금요일, 영업일
+        expect(getLastBusinessDay("10/01/2026", "dd/MM/yyyy")).toEqual("09/01/2026"); // 토요일 → 금요일
+      });
+
+      it("점 구분자 포맷으로 입출력해야 함", () => {
+        expect(getLastBusinessDay("2026.01.02", "yyyy.MM.dd")).toEqual("2026.01.02"); // 금요일, 영업일
+        expect(getLastBusinessDay("2026.01.01", "yyyy.MM.dd")).toEqual("2025.12.31"); // 신정 → 이전 영업일
+      });
     });
   });
 

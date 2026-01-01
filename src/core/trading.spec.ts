@@ -26,6 +26,23 @@ describe("trading", () => {
       expect(isTradingDay("2025-08-28")).toEqual(true); // 목요일
       expect(isTradingDay("2025-08-29")).toEqual(true); // 금요일
     });
+
+    describe("with format parameter", () => {
+      it("미국식 날짜 포맷(MM/dd/yyyy)을 처리해야 함", () => {
+        expect(isTradingDay("01/02/2024", "MM/dd/yyyy")).toEqual(true); // 화요일, 거래일
+        expect(isTradingDay("01/01/2024", "MM/dd/yyyy")).toEqual(false); // 신정
+      });
+
+      it("유럽식 날짜 포맷(dd/MM/yyyy)을 처리해야 함", () => {
+        expect(isTradingDay("02/01/2024", "dd/MM/yyyy")).toEqual(true); // 2024-01-02, 화요일
+        expect(isTradingDay("06/01/2024", "dd/MM/yyyy")).toEqual(false); // 2024-01-06, 토요일
+      });
+
+      it("점 구분자 포맷(yyyy.MM.dd)을 처리해야 함", () => {
+        expect(isTradingDay("2024.01.02", "yyyy.MM.dd")).toEqual(true); // 화요일
+        expect(isTradingDay("2024.12.31", "yyyy.MM.dd")).toEqual(false); // 연말휴장일
+      });
+    });
   });
 
   describe("getNextTradingDay", () => {
@@ -93,6 +110,23 @@ describe("trading", () => {
         expect(() => getNextTradingDay("2025-08-25", -5)).toThrow(
           "count must be a positive number"
         );
+      });
+    });
+
+    describe("with format parameter", () => {
+      it("미국식 포맷으로 입출력해야 함", () => {
+        expect(getNextTradingDay("01/01/2024", 1, "MM/dd/yyyy")).toEqual("01/02/2024"); // 신정 → 다음 거래일
+        expect(getNextTradingDay("08/29/2025", 1, "MM/dd/yyyy")).toEqual("09/01/2025"); // 금요일 → 월요일
+      });
+
+      it("유럽식 포맷으로 입출력해야 함", () => {
+        expect(getNextTradingDay("01/01/2024", 1, "dd/MM/yyyy")).toEqual("02/01/2024"); // 신정 → 다음 거래일
+        expect(getNextTradingDay("29/08/2025", 2, "dd/MM/yyyy")).toEqual("02/09/2025"); // 금요일 → 화요일
+      });
+
+      it("점 구분자 포맷으로 count와 함께 사용해야 함", () => {
+        expect(getNextTradingDay("2025.08.29", 3, "yyyy.MM.dd")).toEqual("2025.09.03"); // 금요일 → 수요일
+        expect(getNextTradingDay("2025.01.01", 5, "yyyy.MM.dd")).toEqual("2025.01.08"); // 신정 → 5번째 거래일
       });
     });
   });
@@ -164,6 +198,23 @@ describe("trading", () => {
         );
       });
     });
+
+    describe("with format parameter", () => {
+      it("미국식 포맷으로 입출력해야 함", () => {
+        expect(getPreviousTradingDay("01/02/2025", 1, "MM/dd/yyyy")).toEqual("12/30/2024"); // 신정 다음 → 이전 거래일
+        expect(getPreviousTradingDay("09/01/2025", 1, "MM/dd/yyyy")).toEqual("08/29/2025"); // 월요일 → 금요일
+      });
+
+      it("유럽식 포맷으로 입출력해야 함", () => {
+        expect(getPreviousTradingDay("02/01/2025", 1, "dd/MM/yyyy")).toEqual("30/12/2024"); // 신정 다음 → 이전 거래일
+        expect(getPreviousTradingDay("27/08/2025", 2, "dd/MM/yyyy")).toEqual("25/08/2025"); // 수요일 → 월요일
+      });
+
+      it("점 구분자 포맷으로 count와 함께 사용해야 함", () => {
+        expect(getPreviousTradingDay("2025.09.01", 3, "yyyy.MM.dd")).toEqual("2025.08.27"); // 월요일 → 수요일
+        expect(getPreviousTradingDay("2025.01.08", 5, "yyyy.MM.dd")).toEqual("2024.12.30"); // 5번째 이전 거래일
+      });
+    });
   });
 
   describe("getLastTradingDay", () => {
@@ -177,6 +228,23 @@ describe("trading", () => {
 
     it("주말이면 이전 거래일을 반환해야 함", () => {
       expect(getLastTradingDay("2026-01-10")).toEqual("2026-01-09"); // 토요일 → 금요일
+    });
+
+    describe("with format parameter", () => {
+      it("미국식 포맷으로 입출력해야 함", () => {
+        expect(getLastTradingDay("01/02/2026", "MM/dd/yyyy")).toEqual("01/02/2026"); // 금요일, 거래일
+        expect(getLastTradingDay("01/01/2026", "MM/dd/yyyy")).toEqual("12/30/2025"); // 신정 → 이전 거래일
+      });
+
+      it("유럽식 포맷으로 입출력해야 함", () => {
+        expect(getLastTradingDay("02/01/2026", "dd/MM/yyyy")).toEqual("02/01/2026"); // 금요일, 거래일
+        expect(getLastTradingDay("10/01/2026", "dd/MM/yyyy")).toEqual("09/01/2026"); // 토요일 → 금요일
+      });
+
+      it("점 구분자 포맷으로 입출력해야 함", () => {
+        expect(getLastTradingDay("2026.01.02", "yyyy.MM.dd")).toEqual("2026.01.02"); // 금요일, 거래일
+        expect(getLastTradingDay("2026.01.01", "yyyy.MM.dd")).toEqual("2025.12.30"); // 신정 → 이전 거래일
+      });
     });
   });
 
