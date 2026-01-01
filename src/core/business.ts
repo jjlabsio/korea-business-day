@@ -9,7 +9,7 @@ import { isHoliday } from "./holiday.ts";
 
 /**
  * 주어진 날짜가 영업일인지 판단합니다 (주말 및 공휴일 제외)
- * @param date - 확인할 날짜 문자열
+ * @param dateStr - 확인할 날짜 문자열
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 영업일인 경우 true, 아니면 false
  * @example
@@ -18,13 +18,13 @@ import { isHoliday } from "./holiday.ts";
  * isBusinessDay('01/02/2024', 'MM/dd/yyyy'); // true (미국식 포맷)
  * isBusinessDay('2024-01-06'); // false (토요일, 주말)
  */
-export const isBusinessDay: Predicate = (date, format = "yyyy-MM-dd") => {
-  return !isWeekend(date, format) && !isHoliday(date, format);
+export const isBusinessDay: Predicate = (dateStr, format = "yyyy-MM-dd") => {
+  return !isWeekend(dateStr, format) && !isHoliday(dateStr, format);
 };
 
 /**
  * 주어진 날짜 다음의 N번째 영업일을 반환합니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param count - 몇 번째 영업일인지 (기본값: 1)
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 다음 영업일 날짜 (format 파라미터로 지정된 형식)
@@ -36,16 +36,16 @@ export const isBusinessDay: Predicate = (date, format = "yyyy-MM-dd") => {
  * getNextBusinessDay('2024-12-31', 5); // '2025-01-08' (연말연시 다음 다섯 번째 영업일)
  */
 export const getNextBusinessDay = (
-  date: string,
+  dateStr: string,
   count: number = 1,
   format = "yyyy-MM-dd"
 ): string => {
-  return findNextDate(date, count, isBusinessDay, format);
+  return findNextDate(dateStr, count, isBusinessDay, format);
 };
 
 /**
  * 주어진 날짜 이전의 N번째 영업일을 반환합니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param count - 몇 번째 영업일인지 (기본값: 1)
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 이전 영업일 날짜 (format 파라미터로 지정된 형식)
@@ -57,17 +57,17 @@ export const getNextBusinessDay = (
  * getPreviousBusinessDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 영업일)
  */
 export const getPreviousBusinessDay = (
-  date: string,
+  dateStr: string,
   count: number = 1,
   format = "yyyy-MM-dd"
 ): string => {
-  return findPreviousDate(date, count, isBusinessDay, format);
+  return findPreviousDate(dateStr, count, isBusinessDay, format);
 };
 
 /**
  * 주어진 날짜를 기준으로 가장 최근 영업일을 반환합니다
  * 주어진 날짜가 영업일이면 그대로 반환하고, 아니면 가장 최근의 영업일을 반환합니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 가장 최근 영업일 (format 파라미터로 지정된 형식)
  * @example
@@ -77,8 +77,8 @@ export const getPreviousBusinessDay = (
  * getLastBusinessDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
  */
 export const getLastBusinessDay = (
-  date: string,
+  dateStr: string,
   format = "yyyy-MM-dd"
 ): string => {
-  return findLastDate(date, isBusinessDay, format);
+  return findLastDate(dateStr, isBusinessDay, format);
 };

@@ -8,7 +8,7 @@ import {
   format,
 } from "date-fns";
 
-export type Predicate = (date: string, format?: string) => boolean;
+export type Predicate = (dateStr: string, format?: string) => boolean;
 
 /**
  * UTC Date 객체를 한국 시간(KST) 기준 날짜 문자열로 변환합니다
@@ -26,7 +26,7 @@ export const toKstString = (d: Date, format: string = "yyyy-MM-dd"): string =>
 
 /**
  * 임의의 형식의 날짜 문자열을 표준 형식(yyyy-MM-dd)으로 정규화합니다
- * @param date - 변환할 날짜 문자열
+ * @param dateStr - 변환할 날짜 문자열
  * @param dateFormat - 입력 날짜의 포맷 (기본값: "yyyy-MM-dd")
  * @returns 표준 형식(yyyy-MM-dd)의 날짜 문자열
  * @example
@@ -35,16 +35,16 @@ export const toKstString = (d: Date, format: string = "yyyy-MM-dd"): string =>
  * normalizeToStandardFormat("2026년 1월 1일", "yyyy년 M월 d일"); // "2026-01-01"
  */
 export const normalizeToStandardFormat = (
-  date: string,
+  dateStr: string,
   dateFormat: string = "yyyy-MM-dd"
 ): string => {
-  const parsed = parse(date, dateFormat, new Date());
+  const parsed = parse(dateStr, dateFormat, new Date());
   return format(parsed, "yyyy-MM-dd");
 };
 
 /**
  * 날짜 문자열을 한국 시간(KST) 기준 자정의 UTC Date 객체로 변환합니다
- * @param date - 변환할 날짜 문자열
+ * @param dateStr - 변환할 날짜 문자열
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 한국 시간 기준 해당 날짜 자정(00:00)을 나타내는 UTC Date 객체
  * @example
@@ -53,16 +53,16 @@ export const normalizeToStandardFormat = (
  * kstMidnightToUtc("2026년 1월 1일", "yyyy년 M월 d일"); // 2025-12-31T15:00:00.000Z
  */
 export const kstMidnightToUtc = (
-  date: string,
+  dateStr: string,
   dateFormat: string = "yyyy-MM-dd"
 ): Date => {
-  const normalizedDate = normalizeToStandardFormat(date, dateFormat);
+  const normalizedDate = normalizeToStandardFormat(dateStr, dateFormat);
   return fromZonedTime(`${normalizedDate} 00:00`, "Asia/Seoul");
 };
 
 /**
  * 주어진 날짜가 주말(토요일 또는 일요일)인지 판단합니다
- * @param date - 확인할 날짜 문자열
+ * @param dateStr - 확인할 날짜 문자열
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 주말인 경우 true, 아니면 false
  * @example
@@ -71,10 +71,10 @@ export const kstMidnightToUtc = (
  * isWeekend("12-27-2025", "MM-dd-yyyy"); // true (미국식)
  */
 export const isWeekend = (
-  date: string,
+  dateStr: string,
   format: string = "yyyy-MM-dd"
 ): boolean => {
-  const d = parse(date, format, new Date());
+  const d = parse(dateStr, format, new Date());
   return isSaturday(d) || isSunday(d);
 };
 
@@ -91,21 +91,21 @@ const validateCount = (count: number): void => {
 
 /**
  * 주어진 날짜 다음의 N번째 조건을 만족하는 날짜를 찾습니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param count - 몇 번째 날짜인지
  * @param predicate - 날짜 조건 판별 함수
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 다음 조건 만족 날짜 (지정된 형식)
  */
 export const findNextDate = (
-  date: string,
+  dateStr: string,
   count: number,
   predicate: Predicate,
   format: string = "yyyy-MM-dd"
 ): string => {
   validateCount(count);
 
-  let d = kstMidnightToUtc(date, format);
+  let d = kstMidnightToUtc(dateStr, format);
   let foundCount = 0;
 
   while (foundCount < count) {
@@ -122,21 +122,21 @@ export const findNextDate = (
 
 /**
  * 주어진 날짜 이전의 N번째 조건을 만족하는 날짜를 찾습니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param count - 몇 번째 날짜인지
  * @param predicate - 날짜 조건 판별 함수
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 이전 조건 만족 날짜 (지정된 형식)
  */
 export const findPreviousDate = (
-  date: string,
+  dateStr: string,
   count: number,
   predicate: Predicate,
   format: string = "yyyy-MM-dd"
 ): string => {
   validateCount(count);
 
-  let d = kstMidnightToUtc(date, format);
+  let d = kstMidnightToUtc(dateStr, format);
   let foundCount = 0;
 
   while (foundCount < count) {
@@ -153,22 +153,22 @@ export const findPreviousDate = (
 
 /**
  * 주어진 날짜를 기준으로 가장 최근 조건을 만족하는 날짜를 찾습니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param predicate - 날짜 조건 판별 함수
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 가장 최근 조건 만족 날짜 (지정된 형식)
  */
 export const findLastDate = (
-  date: string,
+  dateStr: string,
   predicate: Predicate,
   format: string = "yyyy-MM-dd"
 ): string => {
   // 주어진 날짜가 조건을 만족하면 그대로 반환
-  if (predicate(date, format)) {
-    return date;
+  if (predicate(dateStr, format)) {
+    return dateStr;
   }
 
-  let d = kstMidnightToUtc(date, format);
+  let d = kstMidnightToUtc(dateStr, format);
 
   while (true) {
     d = subDays(d, 1);

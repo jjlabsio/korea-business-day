@@ -9,7 +9,7 @@ import { isTradingHoliday } from "./holiday.ts";
 
 /**
  * 주어진 날짜가 한국 주식시장 개장일인지 판단합니다 (주말 및 거래소 휴무일 제외)
- * @param date - 확인할 날짜 문자열
+ * @param dateStr - 확인할 날짜 문자열
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 개장일인 경우 true, 아니면 false
  * @example
@@ -19,13 +19,13 @@ import { isTradingHoliday } from "./holiday.ts";
  * isTradingDay('2024-12-31'); // false (연말 특별휴무일)
  * isTradingDay('2024-01-06'); // false (토요일, 주말)
  */
-export const isTradingDay: Predicate = (date, format = "yyyy-MM-dd") => {
-  return !isWeekend(date, format) && !isTradingHoliday(date, format);
+export const isTradingDay: Predicate = (dateStr, format = "yyyy-MM-dd") => {
+  return !isWeekend(dateStr, format) && !isTradingHoliday(dateStr, format);
 };
 
 /**
  * 주어진 날짜 다음의 N번째 주식시장 개장일을 반환합니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param count - 몇 번째 개장일인지 (기본값: 1)
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 다음 개장일 날짜 (format 파라미터로 지정된 형식)
@@ -37,16 +37,16 @@ export const isTradingDay: Predicate = (date, format = "yyyy-MM-dd") => {
  * getNextTradingDay('2024-05-03', 5); // '2024-05-13' (어린이날 연휴 다음 다섯 번째 개장일)
  */
 export const getNextTradingDay = (
-  date: string,
+  dateStr: string,
   count: number = 1,
   format = "yyyy-MM-dd"
 ): string => {
-  return findNextDate(date, count, isTradingDay, format);
+  return findNextDate(dateStr, count, isTradingDay, format);
 };
 
 /**
  * 주어진 날짜 이전의 N번째 주식시장 개장일을 반환합니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param count - 몇 번째 개장일인지 (기본값: 1)
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 이전 개장일 날짜 (format 파라미터로 지정된 형식)
@@ -58,17 +58,17 @@ export const getNextTradingDay = (
  * getPreviousTradingDay('2024-05-07', 5); // '2024-04-30' (어린이날 연휴 이전 다섯 번째 개장일)
  */
 export const getPreviousTradingDay = (
-  date: string,
+  dateStr: string,
   count: number = 1,
   format = "yyyy-MM-dd"
 ): string => {
-  return findPreviousDate(date, count, isTradingDay, format);
+  return findPreviousDate(dateStr, count, isTradingDay, format);
 };
 
 /**
  * 주어진 날짜를 기준으로 가장 최근 거래일을 반환합니다
  * 주어진 날짜가 거래일이면 그대로 반환하고, 아니면 가장 최근의 거래일을 반환합니다
- * @param date - 기준 날짜 문자열
+ * @param dateStr - 기준 날짜 문자열
  * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 가장 최근 거래일 (format 파라미터로 지정된 형식)
  * @example
@@ -78,8 +78,8 @@ export const getPreviousTradingDay = (
  * getLastTradingDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
  */
 export const getLastTradingDay = (
-  date: string,
+  dateStr: string,
   format = "yyyy-MM-dd"
 ): string => {
-  return findLastDate(date, isTradingDay, format);
+  return findLastDate(dateStr, isTradingDay, format);
 };
