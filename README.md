@@ -42,6 +42,10 @@ import {
 console.log(isBusinessDay("2025-01-02")); // true (목요일)
 console.log(isBusinessDay("2025-01-01")); // false (신정)
 
+// 다양한 날짜 포맷 지원
+console.log(isBusinessDay("01/02/2025", "MM/dd/yyyy")); // true (미국식 포맷)
+console.log(getNextBusinessDay("01/01/2025", 1, "MM/dd/yyyy")); // "01/02/2025"
+
 // 공휴일 확인
 console.log(isHoliday("2025-03-03")); // true (삼일절 대체휴일)
 ```
@@ -52,7 +56,7 @@ console.log(isHoliday("2025-03-03")); // true (삼일절 대체휴일)
 
 영업일 계산 관련 함수들입니다. 주말과 공휴일을 제외한 평일을 기준으로 합니다.
 
-#### `isBusinessDay(date: string): boolean`
+#### `isBusinessDay(date: string, format?: string): boolean`
 
 주어진 날짜가 영업일인지 판단합니다.
 
@@ -62,9 +66,13 @@ import { isBusinessDay } from "korea-business-day/business";
 console.log(isBusinessDay("2025-01-02")); // true (목요일, 평일)
 console.log(isBusinessDay("2025-01-01")); // false (신정, 공휴일)
 console.log(isBusinessDay("2025-01-04")); // false (토요일, 주말)
+
+// 다양한 포맷 지원
+console.log(isBusinessDay("01/02/2025", "MM/dd/yyyy")); // true (미국식 포맷)
+console.log(isBusinessDay("2025.01.02", "yyyy.MM.dd")); // true (점 구분자)
 ```
 
-#### `getNextBusinessDay(date: string, count: number = 1): string`
+#### `getNextBusinessDay(date: string, count: number = 1, format?: string): string`
 
 주어진 날짜 다음의 N번째 영업일을 반환합니다.
 
@@ -75,9 +83,12 @@ console.log(getNextBusinessDay("2025-01-01")); // '2025-01-02' (신정 다음 �
 console.log(getNextBusinessDay("2025-01-01", 2)); // '2025-01-03' (신정 다음 두 번째 영업일)
 console.log(getNextBusinessDay("2025-01-03")); // '2025-01-06' (금요일 다음 영업일은 월요일)
 console.log(getNextBusinessDay("2025-12-31", 5)); // '2026-01-09' (연말연시 다음 다섯 번째 영업일)
+
+// 다양한 포맷 지원
+console.log(getNextBusinessDay("01/01/2025", 1, "MM/dd/yyyy")); // '01/02/2025' (미국식 포맷)
 ```
 
-#### `getPreviousBusinessDay(date: string, count: number = 1): string`
+#### `getPreviousBusinessDay(date: string, count: number = 1, format?: string): string`
 
 주어진 날짜 이전의 N번째 영업일을 반환합니다.
 
@@ -88,9 +99,12 @@ console.log(getPreviousBusinessDay("2025-01-02")); // '2024-12-31' (신정 이�
 console.log(getPreviousBusinessDay("2025-01-08", 2)); // '2025-01-03' (월요일 이전 두 번째 영업일)
 console.log(getPreviousBusinessDay("2025-01-06")); // '2025-01-03' (월요일 이전 영업일은 금요일)
 console.log(getPreviousBusinessDay("2025-03-04", 3)); // '2025-02-26' (삼일절 대체휴일 이전 세 번째 영업일)
+
+// 다양한 포맷 지원
+console.log(getPreviousBusinessDay("03/04/2025", 3, "MM/dd/yyyy")); // '02/26/2025' (미국식 포맷)
 ```
 
-#### `getLastBusinessDay(date: string): string`
+#### `getLastBusinessDay(date: string, format?: string): string`
 
 주어진 날짜를 기준으로 가장 최근 영업일을 반환합니다. 주어진 날짜가 영업일이면 그대로 반환하고, 아니면 가장 최근의 영업일을 반환합니다.
 
@@ -100,9 +114,12 @@ import { getLastBusinessDay } from "korea-business-day/business";
 console.log(getLastBusinessDay("2026-01-02")); // '2026-01-02' (금요일, 영업일)
 console.log(getLastBusinessDay("2026-01-01")); // '2025-12-31' (신정은 공휴일, 이전 영업일)
 console.log(getLastBusinessDay("2026-01-10")); // '2026-01-09' (토요일 → 금요일)
+
+// 다양한 포맷 지원
+console.log(getLastBusinessDay("01/10/2026", "MM/dd/yyyy")); // '01/09/2026' (미국식 포맷)
 ```
 
-#### `isTradingDay(date: string): boolean`
+#### `isTradingDay(date: string, format?: string): boolean`
 
 주어진 날짜가 주식시장 개장일인지 판단합니다.
 
@@ -112,9 +129,12 @@ import { isTradingDay } from "korea-business-day/business";
 console.log(isTradingDay("2025-01-02")); // true (목요일, 개장일)
 console.log(isTradingDay("2025-01-01")); // false (신정, 거래소 휴무)
 console.log(isTradingDay("2025-12-31")); // false (연말휴장일)
+
+// 다양한 포맷 지원
+console.log(isTradingDay("01/02/2025", "MM/dd/yyyy")); // true (미국식 포맷)
 ```
 
-#### `getNextTradingDay(date: string, count: number = 1): string`
+#### `getNextTradingDay(date: string, count: number = 1, format?: string): string`
 
 주어진 날짜 다음의 N번째 주식시장 개장일을 반환합니다.
 
@@ -125,9 +145,12 @@ console.log(getNextTradingDay("2025-01-01")); // '2025-01-02' (신정 다음 첫
 console.log(getNextTradingDay("2025-01-01", 2)); // '2025-01-03' (신정 다음 두 번째 개장일)
 console.log(getNextTradingDay("2025-12-30")); // '2026-01-02' (연말 다음 개장일)
 console.log(getNextTradingDay("2025-05-05", 3)); // '2025-05-09' (어린이날 다음 세 번째 개장일)
+
+// 다양한 포맷 지원
+console.log(getNextTradingDay("01/01/2025", 1, "MM/dd/yyyy")); // '01/02/2025' (미국식 포맷)
 ```
 
-#### `getPreviousTradingDay(date: string, count: number = 1): string`
+#### `getPreviousTradingDay(date: string, count: number = 1, format?: string): string`
 
 주어진 날짜 이전의 N번째 주식시장 개장일을 반환합니다.
 
@@ -138,9 +161,12 @@ console.log(getPreviousTradingDay("2025-01-02")); // '2024-12-30' (신정 이전
 console.log(getPreviousTradingDay("2025-01-08", 2)); // '2025-01-03' (월요일 이전 두 번째 개장일)
 console.log(getPreviousTradingDay("2025-05-07")); // '2025-05-02' (어린이날 연휴 이전 개장일)
 console.log(getPreviousTradingDay("2025-05-07", 5)); // '2025-04-30' (어린이날 연휴 이전 다섯 번째 개장일)
+
+// 다양한 포맷 지원
+console.log(getPreviousTradingDay("05/07/2025", 1, "MM/dd/yyyy")); // '05/02/2025' (미국식 포맷)
 ```
 
-#### `getLastTradingDay(date: string): string`
+#### `getLastTradingDay(date: string, format?: string): string`
 
 주어진 날짜를 기준으로 가장 최근 거래일을 반환합니다. 주어진 날짜가 거래일이면 그대로 반환하고, 아니면 가장 최근의 거래일을 반환합니다.
 
@@ -150,13 +176,16 @@ import { getLastTradingDay } from "korea-business-day/business";
 console.log(getLastTradingDay("2026-01-02")); // '2026-01-02' (금요일, 거래일)
 console.log(getLastTradingDay("2026-01-01")); // '2025-12-30' (신정은 휴무, 31일은 휴장일, 이전 거래일)
 console.log(getLastTradingDay("2026-01-10")); // '2026-01-09' (토요일 → 금요일)
+
+// 다양한 포맷 지원
+console.log(getLastTradingDay("01/10/2026", "MM/dd/yyyy")); // '01/09/2026' (미국식 포맷)
 ```
 
 ### Holiday 모듈
 
 공휴일 및 거래소 휴무일 확인 함수들입니다.
 
-#### `isHoliday(date: string): boolean`
+#### `isHoliday(date: string, format?: string): boolean`
 
 주어진 날짜가 한국의 공휴일인지 판단합니다.
 
@@ -168,9 +197,12 @@ console.log(isHoliday("2025-03-03")); // true (삼일절 대체휴일)
 console.log(isHoliday("2025-05-05")); // true (어린이날)
 console.log(isHoliday("2025-01-02")); // false (평일)
 console.log(isHoliday("2025-12-31")); // false (연말휴장일은 공휴일 아님)
+
+// 다양한 포맷 지원
+console.log(isHoliday("01/01/2025", "MM/dd/yyyy")); // true (미국식 포맷)
 ```
 
-#### `isTradingHoliday(date: string): boolean`
+#### `isTradingHoliday(date: string, format?: string): boolean`
 
 주어진 날짜가 한국 주식시장 휴무일인지 판단합니다.
 
@@ -181,6 +213,9 @@ console.log(isTradingHoliday("2025-01-01")); // true (신정, 거래소 휴무)
 console.log(isTradingHoliday("2025-12-31")); // true (연말휴장일)
 console.log(isTradingHoliday("2025-03-03")); // true (삼일절 대체휴일)
 console.log(isTradingHoliday("2025-01-02")); // false (정상 거래일)
+
+// 다양한 포맷 지원
+console.log(isTradingHoliday("12/31/2025", "MM/dd/yyyy")); // true (미국식 포맷)
 ```
 
 ## 지원 연도
@@ -208,12 +243,15 @@ console.log(isTradingHoliday("2025-01-01")); // true
 
 ## TypeScript 지원
 
-모든 함수는 완전한 타입 정의를 제공합니다.
-
 ```typescript
-// 모든 날짜는 'YYYY-MM-DD' 형식의 문자열을 사용합니다
-const date: string = "2025-01-01"; // ✅ 올바른 형식
-const invalidDate: string = "25-1-1"; // 런타임에서 확인 필요
+// 기본 포맷은 'yyyy-MM-dd'이지만, format 파라미터로 다양한 형식 지원
+const date1: string = "2025-01-01"; // ✅ 기본 포맷 (yyyy-MM-dd)
+const date2: string = "01/01/2025"; // ✅ 미국식 포맷 (MM/dd/yyyy)
+const date3: string = "2025.01.01"; // ✅ 점 구분자 포맷 (yyyy.MM.dd)
+
+// format 파라미터를 사용한 예시
+isBusinessDay("01/15/2025", "MM/dd/yyyy"); // ✅ 포맷 지정
+getNextBusinessDay("2025-01-01", 1, "yyyy-MM-dd"); // ✅ 명시적 포맷
 ```
 
 ## 라이선스
