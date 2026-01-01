@@ -6,6 +6,13 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+## 주요 특징
+
+- **타임존 독립적**: 서버의 로컬 타임존 설정에 영향을 받지 않고 안전하게 날짜를 계산합니다
+- **다양한 날짜 포맷 지원**: `yyyy-MM-dd`, `MM/dd/yyyy`, `yyyy.MM.dd` 등 여러 형식을 지원합니다
+- **TypeScript 완벽 지원**: 타입 안정성을 제공합니다
+- **영업일 및 거래일 계산**: 주말, 공휴일, 거래소 휴무일을 모두 고려합니다
+
 ## 설치
 
 ```bash
