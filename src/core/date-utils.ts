@@ -1,26 +1,64 @@
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
-import { isSaturday, isSunday, parse, addDays, subDays } from "date-fns";
+import {
+  isSaturday,
+  isSunday,
+  parse,
+  addDays,
+  subDays,
+  format,
+} from "date-fns";
+
+export type Predicate = (date: string, format?: string) => boolean;
 
 /**
  * UTC Date 객체를 한국 시간(KST) 기준 날짜 문자열로 변환합니다
  * @param d - 변환할 Date 객체
- * @returns 한국 시간 기준 YYYY-MM-DD 형식의 날짜 문자열
+ * @param format - 출력 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @returns 한국 시간 기준 지정된 형식의 날짜 문자열
  * @example
  * const utcDate = new Date("2025-12-31T15:00:00.000Z");
  * toKstString(utcDate); // "2026-01-01" (KST는 UTC+9)
+ * toKstString(utcDate, "yyyy/MM/dd"); // "2026/01/01"
+ * toKstString(utcDate, "MM-dd-yyyy"); // "01-01-2026"
  */
-export const toKstString = (d: Date): string =>
-  formatInTimeZone(d, "Asia/Seoul", "yyyy-MM-dd");
+export const toKstString = (d: Date, format: string = "yyyy-MM-dd"): string =>
+  formatInTimeZone(d, "Asia/Seoul", format);
+
+/**
+ * 임의의 형식의 날짜 문자열을 표준 형식(yyyy-MM-dd)으로 정규화합니다
+ * @param date - 변환할 날짜 문자열
+ * @param dateFormat - 입력 날짜의 포맷 (기본값: "yyyy-MM-dd")
+ * @returns 표준 형식(yyyy-MM-dd)의 날짜 문자열
+ * @example
+ * normalizeToStandardFormat("2026-01-01"); // "2026-01-01"
+ * normalizeToStandardFormat("01/01/2026", "MM/dd/yyyy"); // "2026-01-01"
+ * normalizeToStandardFormat("2026년 1월 1일", "yyyy년 M월 d일"); // "2026-01-01"
+ */
+export const normalizeToStandardFormat = (
+  date: string,
+  dateFormat: string = "yyyy-MM-dd"
+): string => {
+  const parsed = parse(date, dateFormat, new Date());
+  return format(parsed, "yyyy-MM-dd");
+};
 
 /**
  * 날짜 문자열을 한국 시간(KST) 기준 자정의 UTC Date 객체로 변환합니다
- * @param date - 변환할 날짜 문자열 (YYYY-MM-DD 형식)
+ * @param date - 변환할 날짜 문자열
+ * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 한국 시간 기준 해당 날짜 자정(00:00)을 나타내는 UTC Date 객체
  * @example
  * kstMidnightToUtc("2026-01-01"); // 2025-12-31T15:00:00.000Z (한국 2026-01-01 00:00)
+ * kstMidnightToUtc("01/01/2026", "MM/dd/yyyy"); // 2025-12-31T15:00:00.000Z
+ * kstMidnightToUtc("2026년 1월 1일", "yyyy년 M월 d일"); // 2025-12-31T15:00:00.000Z
  */
-export const kstMidnightToUtc = (date: string): Date =>
-  fromZonedTime(`${date} 00:00`, "Asia/Seoul");
+export const kstMidnightToUtc = (
+  date: string,
+  dateFormat: string = "yyyy-MM-dd"
+): Date => {
+  const normalizedDate = normalizeToStandardFormat(date, dateFormat);
+  return fromZonedTime(`${normalizedDate} 00:00`, "Asia/Seoul");
+};
 
 /**
  * 주어진 날짜가 주말(토요일 또는 일요일)인지 판단합니다
@@ -53,19 +91,21 @@ const validateCount = (count: number): void => {
 
 /**
  * 주어진 날짜 다음의 N번째 조건을 만족하는 날짜를 찾습니다
- * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param date - 기준 날짜 문자열
  * @param count - 몇 번째 날짜인지
  * @param predicate - 날짜 조건 판별 함수
- * @returns N번째 다음 조건 만족 날짜 (YYYY-MM-DD 형식)
+ * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @returns N번째 다음 조건 만족 날짜 (지정된 형식)
  */
 export const findNextDate = (
   date: string,
   count: number,
-  predicate: (date: string) => boolean
+  predicate: Predicate,
+  format: string = "yyyy-MM-dd"
 ): string => {
   validateCount(count);
 
-  let d = kstMidnightToUtc(date);
+  let d = kstMidnightToUtc(date, format);
   let foundCount = 0;
 
   while (foundCount < count) {
@@ -77,24 +117,26 @@ export const findNextDate = (
     }
   }
 
-  return toKstString(d);
+  return toKstString(d, format);
 };
 
 /**
  * 주어진 날짜 이전의 N번째 조건을 만족하는 날짜를 찾습니다
- * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param date - 기준 날짜 문자열
  * @param count - 몇 번째 날짜인지
  * @param predicate - 날짜 조건 판별 함수
- * @returns N번째 이전 조건 만족 날짜 (YYYY-MM-DD 형식)
+ * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @returns N번째 이전 조건 만족 날짜 (지정된 형식)
  */
 export const findPreviousDate = (
   date: string,
   count: number,
-  predicate: (date: string) => boolean
+  predicate: Predicate,
+  format: string = "yyyy-MM-dd"
 ): string => {
   validateCount(count);
 
-  let d = kstMidnightToUtc(date);
+  let d = kstMidnightToUtc(date, format);
   let foundCount = 0;
 
   while (foundCount < count) {
@@ -106,30 +148,34 @@ export const findPreviousDate = (
     }
   }
 
-  return toKstString(d);
+  return toKstString(d, format);
 };
 
 /**
  * 주어진 날짜를 기준으로 가장 최근 조건을 만족하는 날짜를 찾습니다
- * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param date - 기준 날짜 문자열
  * @param predicate - 날짜 조건 판별 함수
- * @returns 가장 최근 조건 만족 날짜 (YYYY-MM-DD 형식)
+ * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @returns 가장 최근 조건 만족 날짜 (지정된 형식)
  */
 export const findLastDate = (
   date: string,
-  predicate: (date: string) => boolean
+  predicate: Predicate,
+  format: string = "yyyy-MM-dd"
 ): string => {
   // 주어진 날짜가 조건을 만족하면 그대로 반환
-  if (predicate(date)) {
+  if (predicate(date, format)) {
     return date;
   }
 
-  let d = kstMidnightToUtc(date);
-  d = subDays(d, 1);
+  let d = kstMidnightToUtc(date, format);
 
-  while (!predicate(toKstString(d))) {
+  while (true) {
     d = subDays(d, 1);
-  }
+    const kstString = toKstString(d);
 
-  return toKstString(d);
+    if (predicate(kstString)) {
+      return toKstString(d, format);
+    }
+  }
 };
