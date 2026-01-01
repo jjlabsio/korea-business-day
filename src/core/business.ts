@@ -1,6 +1,10 @@
-import { isWeekend, kstMidnightToUtc, toKstString } from "./date-utils.ts";
+import {
+  isWeekend,
+  findNextDate,
+  findPreviousDate,
+  findLastDate,
+} from "./date-utils.ts";
 import { isHoliday } from "./holiday.ts";
-import { addDays, subDays } from "date-fns";
 
 /**
  * 주어진 날짜가 영업일인지 판단합니다 (주말 및 공휴일 제외)
@@ -27,23 +31,7 @@ export const isBusinessDay = (date: string): boolean => {
  * getNextBusinessDay('2024-12-31', 5); // '2025-01-08' (연말연시 다음 다섯 번째 영업일)
  */
 export const getNextBusinessDay = (date: string, count: number = 1): string => {
-  if (count <= 0) {
-    throw new Error("count must be a positive number");
-  }
-
-  let d = kstMidnightToUtc(date);
-  let foundCount = 0;
-
-  while (foundCount < count) {
-    d = addDays(d, 1);
-    const kstString = toKstString(d);
-
-    if (isBusinessDay(kstString)) {
-      foundCount++;
-    }
-  }
-
-  return toKstString(d);
+  return findNextDate(date, count, isBusinessDay);
 };
 
 /**
@@ -61,23 +49,7 @@ export const getPreviousBusinessDay = (
   date: string,
   count: number = 1
 ): string => {
-  if (count <= 0) {
-    throw new Error("count must be a positive number");
-  }
-
-  let d = kstMidnightToUtc(date);
-  let foundCount = 0;
-
-  while (foundCount < count) {
-    d = subDays(d, 1);
-    const kstString = toKstString(d);
-
-    if (isBusinessDay(kstString)) {
-      foundCount++;
-    }
-  }
-
-  return toKstString(d);
+  return findPreviousDate(date, count, isBusinessDay);
 };
 
 /**
@@ -91,17 +63,5 @@ export const getPreviousBusinessDay = (
  * getLastBusinessDay('2026-01-10'); // '2026-01-09' (토요일 → 금요일)
  */
 export const getLastBusinessDay = (date: string): string => {
-  // 주어진 날짜가 영업일이면 그대로 반환
-  if (isBusinessDay(date)) {
-    return date;
-  }
-
-  let d = kstMidnightToUtc(date);
-  d = subDays(d, 1);
-
-  while (!isBusinessDay(toKstString(d))) {
-    d = subDays(d, 1);
-  }
-
-  return toKstString(d);
+  return findLastDate(date, isBusinessDay);
 };
