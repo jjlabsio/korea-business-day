@@ -1,27 +1,5 @@
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
-import { isSaturday, isSunday, parse } from "date-fns";
-
-/**
- * 날짜 문자열을 한국 표준시(KST) Date 객체로 변환합니다
- * @param dateStr - 변환할 날짜 문자열 (YYYY-MM-DD 형식)
- * @returns 한국 표준시로 변환된 Date 객체
- */
-export const toDate = (dateStr: string): Date => {
-  const utc = new Date(`${dateStr}T00:00:00Z`); // UTC 자정
-  const kstTime = utc.getTime() + 9 * 60 * 60 * 1000; // KST로 변환
-  const kstDate = new Date(kstTime);
-
-  return kstDate;
-};
-
-/**
- * Date 객체를 YYYY-MM-DD 형식의 날짜 문자열로 변환합니다
- * @param date - 변환할 Date 객체
- * @returns YYYY-MM-DD 형식의 날짜 문자열
- */
-export const toDateString = (date: Date): string => {
-  return date.toISOString().split("T")[0];
-};
+import { isSaturday, isSunday, parse, addDays, subDays } from "date-fns";
 
 /**
  * UTC Date 객체를 한국 시간(KST) 기준 날짜 문자열로 변환합니다
@@ -60,4 +38,98 @@ export const isWeekend = (
 ): boolean => {
   const d = parse(date, format, new Date());
   return isSaturday(d) || isSunday(d);
+};
+
+/**
+ * count가 양수인지 검증합니다
+ * @param count - 검증할 숫자
+ * @throws count가 0 이하일 경우 에러 발생
+ */
+const validateCount = (count: number): void => {
+  if (count <= 0) {
+    throw new Error("count must be a positive number");
+  }
+};
+
+/**
+ * 주어진 날짜 다음의 N번째 조건을 만족하는 날짜를 찾습니다
+ * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param count - 몇 번째 날짜인지
+ * @param predicate - 날짜 조건 판별 함수
+ * @returns N번째 다음 조건 만족 날짜 (YYYY-MM-DD 형식)
+ */
+export const findNextDate = (
+  date: string,
+  count: number,
+  predicate: (date: string) => boolean
+): string => {
+  validateCount(count);
+
+  let d = kstMidnightToUtc(date);
+  let foundCount = 0;
+
+  while (foundCount < count) {
+    d = addDays(d, 1);
+    const kstString = toKstString(d);
+
+    if (predicate(kstString)) {
+      foundCount++;
+    }
+  }
+
+  return toKstString(d);
+};
+
+/**
+ * 주어진 날짜 이전의 N번째 조건을 만족하는 날짜를 찾습니다
+ * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param count - 몇 번째 날짜인지
+ * @param predicate - 날짜 조건 판별 함수
+ * @returns N번째 이전 조건 만족 날짜 (YYYY-MM-DD 형식)
+ */
+export const findPreviousDate = (
+  date: string,
+  count: number,
+  predicate: (date: string) => boolean
+): string => {
+  validateCount(count);
+
+  let d = kstMidnightToUtc(date);
+  let foundCount = 0;
+
+  while (foundCount < count) {
+    d = subDays(d, 1);
+    const kstString = toKstString(d);
+
+    if (predicate(kstString)) {
+      foundCount++;
+    }
+  }
+
+  return toKstString(d);
+};
+
+/**
+ * 주어진 날짜를 기준으로 가장 최근 조건을 만족하는 날짜를 찾습니다
+ * @param date - 기준 날짜 (YYYY-MM-DD 형식)
+ * @param predicate - 날짜 조건 판별 함수
+ * @returns 가장 최근 조건 만족 날짜 (YYYY-MM-DD 형식)
+ */
+export const findLastDate = (
+  date: string,
+  predicate: (date: string) => boolean
+): string => {
+  // 주어진 날짜가 조건을 만족하면 그대로 반환
+  if (predicate(date)) {
+    return date;
+  }
+
+  let d = kstMidnightToUtc(date);
+  d = subDays(d, 1);
+
+  while (!predicate(toKstString(d))) {
+    d = subDays(d, 1);
+  }
+
+  return toKstString(d);
 };
