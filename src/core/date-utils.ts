@@ -92,17 +92,22 @@ const validateCount = (count: number): void => {
 /**
  * 주어진 날짜 다음의 N번째 조건을 만족하는 날짜를 찾습니다
  * @param dateStr - 기준 날짜 문자열
- * @param count - 몇 번째 날짜인지
  * @param predicate - 날짜 조건 판별 함수
- * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @param options - 옵션 객체
+ * @param options.count - 몇 번째 날짜인지 (기본값: 1)
+ * @param options.format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 다음 조건 만족 날짜 (지정된 형식)
  */
 export const findNextDate = (
   dateStr: string,
-  count: number,
   predicate: Predicate,
-  format: string = "yyyy-MM-dd"
+  options: {
+    count?: number;
+    format?: string;
+  } = {}
 ): string => {
+  const { count = 1, format = "yyyy-MM-dd" } = options;
+
   validateCount(count);
 
   let d = kstMidnightToUtc(dateStr, format);
@@ -123,17 +128,22 @@ export const findNextDate = (
 /**
  * 주어진 날짜 이전의 N번째 조건을 만족하는 날짜를 찾습니다
  * @param dateStr - 기준 날짜 문자열
- * @param count - 몇 번째 날짜인지
  * @param predicate - 날짜 조건 판별 함수
- * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @param options - 옵션 객체
+ * @param options.count - 몇 번째 날짜인지 (기본값: 1)
+ * @param options.format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns N번째 이전 조건 만족 날짜 (지정된 형식)
  */
 export const findPreviousDate = (
   dateStr: string,
-  count: number,
   predicate: Predicate,
-  format: string = "yyyy-MM-dd"
+  options: {
+    count?: number;
+    format?: string;
+  } = {}
 ): string => {
+  const { count = 1, format = "yyyy-MM-dd" } = options;
+
   validateCount(count);
 
   let d = kstMidnightToUtc(dateStr, format);
@@ -155,14 +165,19 @@ export const findPreviousDate = (
  * 주어진 날짜를 기준으로 가장 최근 조건을 만족하는 날짜를 찾습니다
  * @param dateStr - 기준 날짜 문자열
  * @param predicate - 날짜 조건 판별 함수
- * @param format - 날짜 포맷 (기본값: "yyyy-MM-dd")
+ * @param options - 옵션 객체
+ * @param options.format - 날짜 포맷 (기본값: "yyyy-MM-dd")
  * @returns 가장 최근 조건 만족 날짜 (지정된 형식)
  */
 export const findLastDate = (
   dateStr: string,
   predicate: Predicate,
-  format: string = "yyyy-MM-dd"
+  options: {
+    format?: string;
+  } = {}
 ): string => {
+  const { format = "yyyy-MM-dd" } = options;
+
   // 주어진 날짜가 조건을 만족하면 그대로 반환
   if (predicate(dateStr, format)) {
     return dateStr;
