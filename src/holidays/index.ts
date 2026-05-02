@@ -1,10 +1,43 @@
 
-import { HOLIDAYS_2022, TRADING_HOLIDAYS_2022 } from "./2022.ts";
-import { HOLIDAYS_2023, TRADING_HOLIDAYS_2023 } from "./2023.ts";
-import { HOLIDAYS_2024, TRADING_HOLIDAYS_2024 } from "./2024.ts";
-import { HOLIDAYS_2025, TRADING_HOLIDAYS_2025 } from "./2025.ts";
-import { HOLIDAYS_2026, TRADING_HOLIDAYS_2026 } from "./2026.ts";
-import { HOLIDAYS_2027, TRADING_HOLIDAYS_2027 } from "./2027.ts";
+import {
+  HOLIDAY_DETAILS_2022,
+  HOLIDAYS_2022,
+  TRADING_HOLIDAY_DETAILS_2022,
+  TRADING_HOLIDAYS_2022,
+} from "./2022.ts";
+import {
+  HOLIDAY_DETAILS_2023,
+  HOLIDAYS_2023,
+  TRADING_HOLIDAY_DETAILS_2023,
+  TRADING_HOLIDAYS_2023,
+} from "./2023.ts";
+import {
+  HOLIDAY_DETAILS_2024,
+  HOLIDAYS_2024,
+  TRADING_HOLIDAY_DETAILS_2024,
+  TRADING_HOLIDAYS_2024,
+} from "./2024.ts";
+import {
+  HOLIDAY_DETAILS_2025,
+  HOLIDAYS_2025,
+  TRADING_HOLIDAY_DETAILS_2025,
+  TRADING_HOLIDAYS_2025,
+} from "./2025.ts";
+import {
+  HOLIDAY_DETAILS_2026,
+  HOLIDAYS_2026,
+  TRADING_HOLIDAY_DETAILS_2026,
+  TRADING_HOLIDAYS_2026,
+} from "./2026.ts";
+import {
+  HOLIDAY_DETAILS_2027,
+  HOLIDAYS_2027,
+  TRADING_HOLIDAY_DETAILS_2027,
+  TRADING_HOLIDAYS_2027,
+} from "./2027.ts";
+import type { Holiday, TradingHoliday } from "./types.ts";
+
+export type { Holiday, TradingHoliday } from "./types.ts";
 
 export const holidaysByYear: Record<string, string[]> = {
   "2022": HOLIDAYS_2022,
@@ -22,4 +55,22 @@ export const tradingHolidaysByYear: Record<string, string[]> = {
   "2025": TRADING_HOLIDAYS_2025,
   "2026": TRADING_HOLIDAYS_2026,
   "2027": TRADING_HOLIDAYS_2027,
+};
+
+export const holidayDetailsByYear: Record<string, Holiday[]> = {
+  "2022": HOLIDAY_DETAILS_2022,
+  "2023": HOLIDAY_DETAILS_2023,
+  "2024": HOLIDAY_DETAILS_2024,
+  "2025": HOLIDAY_DETAILS_2025,
+  "2026": HOLIDAY_DETAILS_2026,
+  "2027": HOLIDAY_DETAILS_2027,
+};
+
+export const tradingHolidayDetailsByYear: Record<string, TradingHoliday[]> = {
+  "2022": TRADING_HOLIDAY_DETAILS_2022,
+  "2023": TRADING_HOLIDAY_DETAILS_2023,
+  "2024": TRADING_HOLIDAY_DETAILS_2024,
+  "2025": TRADING_HOLIDAY_DETAILS_2025,
+  "2026": TRADING_HOLIDAY_DETAILS_2026,
+  "2027": TRADING_HOLIDAY_DETAILS_2027,
 };

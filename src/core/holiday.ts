@@ -1,5 +1,13 @@
-import { holidaysByYear, tradingHolidaysByYear } from "../holidays/index.ts";
+import {
+  holidayDetailsByYear,
+  holidaysByYear,
+  tradingHolidayDetailsByYear,
+  tradingHolidaysByYear,
+} from "../holidays/index.ts";
+import type { Holiday, TradingHoliday } from "../holidays/index.ts";
 import { parse, format } from "date-fns";
+
+export type { Holiday, TradingHoliday } from "../holidays/index.ts";
 
 /**
  * 주어진 날짜가 한국의 공휴일인지 판단합니다
@@ -39,4 +47,44 @@ export const isTradingHoliday = (
   const year = d.getFullYear().toString();
   const standardDate = format(d, "yyyy-MM-dd");
   return tradingHolidaysByYear[year]?.includes(standardDate) ?? false;
+};
+
+/**
+ * 주어진 연도의 한국 공휴일 목록을 반환합니다
+ * @param year - 확인할 연도
+ * @returns 공휴일 목록. 지원하지 않는 연도는 빈 배열을 반환합니다.
+ * @example
+ * getHolidays(2025); // [{ date: '2025-01-01', name: '신정' }, ...]
+ */
+export const getHolidays = (year: number | string): Holiday[] => {
+  return (holidayDetailsByYear[String(year)] ?? []).map((holiday) => ({
+    ...holiday,
+  }));
+};
+
+/**
+ * 주어진 연도의 한국 주식시장 휴무일 목록을 반환합니다
+ * @param year - 확인할 연도
+ * @returns 거래소 휴무일 목록. 지원하지 않는 연도는 빈 배열을 반환합니다.
+ * @example
+ * getTradingHolidays(2025); // [{ date: '2025-01-01', name: '신정' }, ...]
+ */
+export const getTradingHolidays = (
+  year: number | string
+): TradingHoliday[] => {
+  return (tradingHolidayDetailsByYear[String(year)] ?? []).map((holiday) => ({
+    ...holiday,
+  }));
+};
+
+/**
+ * 공휴일 및 거래소 휴무일 데이터를 지원하는 연도 목록을 반환합니다
+ * @returns 지원 연도 목록
+ * @example
+ * getSupportedHolidayYears(); // [2022, 2023, 2024, 2025, 2026, 2027]
+ */
+export const getSupportedHolidayYears = (): number[] => {
+  return Object.keys(holidayDetailsByYear)
+    .map(Number)
+    .sort((a, b) => a - b);
 };

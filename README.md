@@ -43,6 +43,9 @@ import {
   getLastTradingDay,
   isHoliday,
   isTradingHoliday,
+  getHolidays,
+  getTradingHolidays,
+  getSupportedHolidayYears,
 } from "korea-business-day";
 
 // 영업일 확인
@@ -55,6 +58,8 @@ console.log(getNextBusinessDay("01/01/2025", { count: 1, format: "MM/dd/yyyy" })
 
 // 공휴일 확인
 console.log(isHoliday("2025-03-03")); // true (삼일절 대체휴일)
+console.log(getHolidays(2025)); // [{ date: "2025-01-01", name: "신정" }, ...]
+console.log(getSupportedHolidayYears()); // [2022, 2023, 2024, 2025, 2026, 2027]
 ```
 
 ## API 문서
@@ -225,9 +230,77 @@ console.log(isTradingHoliday("2025-01-02")); // false (정상 거래일)
 console.log(isTradingHoliday("12/31/2025", "MM/dd/yyyy")); // true (미국식 포맷)
 ```
 
+#### `getHolidays(year: number | string): Holiday[]`
+
+주어진 연도의 한국 공휴일 목록을 반환합니다. 지원하지 않는 연도는 빈 배열을 반환합니다.
+
+```typescript
+import { getHolidays } from "korea-business-day";
+
+console.log(getHolidays(2025));
+// [
+//   { date: "2025-01-01", name: "신정" },
+//   { date: "2025-01-27", name: "임시공휴일" },
+//   ...
+// ]
+
+console.log(getHolidays("2026"));
+// [{ date: "2026-01-01", name: "신정" }, ...]
+
+console.log(getHolidays(2021)); // []
+```
+
+#### `getTradingHolidays(year: number | string): TradingHoliday[]`
+
+주어진 연도의 한국 주식시장 휴무일 목록을 반환합니다. 일반 공휴일과 거래소 자체 휴장일을 포함하며, 지원하지 않는 연도는 빈 배열을 반환합니다.
+
+```typescript
+import { getTradingHolidays } from "korea-business-day";
+
+console.log(getTradingHolidays(2025));
+// [
+//   { date: "2025-01-01", name: "신정" },
+//   { date: "2025-01-27", name: "임시공휴일" },
+//   ...
+//   { date: "2025-12-31", name: "연말휴장일" }
+// ]
+
+console.log(getTradingHolidays("2026"));
+// [{ date: "2026-01-01", name: "신정" }, ...]
+
+console.log(getTradingHolidays(2021)); // []
+```
+
+#### `getSupportedHolidayYears(): number[]`
+
+공휴일 및 거래소 휴무일 데이터를 지원하는 연도 목록을 오름차순으로 반환합니다.
+
+```typescript
+import { getSupportedHolidayYears } from "korea-business-day";
+
+console.log(getSupportedHolidayYears());
+// [2022, 2023, 2024, 2025, 2026, 2027]
+```
+
+#### `Holiday`, `TradingHoliday`
+
+공휴일과 거래소 휴무일 목록 API는 날짜와 이름만 제공합니다. 휴일 유형은 제공하지 않습니다.
+
+```typescript
+type Holiday = {
+  date: string;
+  name: string;
+};
+
+type TradingHoliday = {
+  date: string;
+  name: string;
+};
+```
+
 ## 지원 연도
 
-현재 **2022년부터 2027년**까지의 휴일 데이터를 지원합니다.
+현재 **2022년부터 2027년**까지의 휴일 데이터를 지원합니다. 지원 연도는 `getSupportedHolidayYears()`로 확인할 수 있습니다.
 
 - 법정공휴일
 - 대체휴일
