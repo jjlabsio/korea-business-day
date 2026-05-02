@@ -1,26 +1,218 @@
 name: Release
 
-permissions:
-  contents: write
-
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact version to publish, for example 2.3.1. Leave empty to run full release."
+        required: false
+        type: string
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: read
+  id-token: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, 'chore(release):')
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set node
-        uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-
-      - run: npx changelogithub
+      - name: Read merged PR
+        if: github.event_name == 'push'
+        run: |
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" \
+            --jq '.[0] // {}' > pr.json
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve release version
+        id: release
+        run: |
+          node <<'NODE'
+          const { execSync } = require("node:child_process");
+          const fs = require("node:fs");
+
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const current = pkg.version;
+          const inputVersion = process.env.INPUT_VERSION || "";
+          const pr = fs.existsSync("pr.json")
+            ? JSON.parse(fs.readFileSync("pr.json", "utf8"))
+            : {};
+          const labels = Array.isArray(pr.labels)
+            ? pr.labels.map((label) => label.name).join("\n")
+            : "";
+
+          const lastTag = (() => {
+            try {
+              return execSync("git describe --tags --abbrev=0", {
+                encoding: "utf8",
+                stdio: ["ignore", "pipe", "ignore"],
+              }).trim();
+            } catch {
+              return "";
+            }
+          })();
+
+          const range = lastTag ? `${lastTag}..HEAD` : "HEAD";
+          const commits = execSync(`git log ${range} --format=%s%n%b`, {
+            encoding: "utf8",
+          });
+          const text = [
+            inputVersion,
+            pr.title || "",
+            pr.body || "",
+            labels,
+            process.env.HEAD_COMMIT || "",
+            commits,
+          ].join("\n");
+
+          const semver = /^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+          const releaseIntentRaw = text.match(
+            /(?:release-version|release|version)\s*:\s*(major|minor|patch|none|\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)/i
+          )?.[1];
+          const releaseIntent = releaseIntentRaw?.toLowerCase();
+          const explicitVersion =
+            inputVersion ||
+            (releaseIntentRaw && semver.test(releaseIntentRaw) ? releaseIntentRaw : "");
+
+          let bump = "";
+          if (explicitVersion) {
+            bump = "exact";
+          } else if (["major", "minor", "patch", "none"].includes(releaseIntent)) {
+            bump = releaseIntent;
+          } else if (/BREAKING CHANGE|^[a-z]+(?:\([^)]+\))?!:/m.test(text)) {
+            bump = "major";
+          } else if (/^feat(?:\([^)]+\))?:/m.test(text)) {
+            bump = "minor";
+          } else if (/^(?:fix|perf|refactor)(?:\([^)]+\))?:/m.test(text)) {
+            bump = "patch";
+          }
+
+          const nextVersion = bump === "none" ? "" : explicitVersion || bumpVersion(current, bump);
+          const output = fs.createWriteStream(process.env.GITHUB_OUTPUT, { flags: "a" });
+
+          if (!nextVersion) {
+            output.write("has_changes=false\n");
+            console.log("No releasable changes found.");
+            process.exit(0);
+          }
+
+          if (!semver.test(nextVersion)) {
+            throw new Error(`Invalid semver: ${nextVersion}`);
+          }
+
+          if (compareSemver(nextVersion, current) < 0) {
+            throw new Error(`Release version ${nextVersion} is lower than current version ${current}`);
+          }
+
+          output.write("has_changes=true\n");
+          output.write(`version=${nextVersion}\n`);
+          console.log(`Release version resolved: ${nextVersion} (${bump})`);
+
+          function bumpVersion(version, type) {
+            if (!type) return "";
+            const [major, minor, patch] = version.split(".").map(Number);
+            if (type === "major") return `${major + 1}.0.0`;
+            if (type === "minor") return `${major}.${minor + 1}.0`;
+            if (type === "patch") return `${major}.${minor}.${patch + 1}`;
+            return "";
+          }
+
+          function compareSemver(a, b) {
+            const parse = (value) => value.split(/[+-]/)[0].split(".").map(Number);
+            const left = parse(a);
+            const right = parse(b);
+            for (let i = 0; i < 3; i += 1) {
+              if (left[i] !== right[i]) return left[i] - right[i];
+            }
+            return 0;
+          }
+          NODE
+        env:
+          HEAD_COMMIT: ${{ github.event.head_commit.message }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+
+      - uses: pnpm/action-setup@v4
+        if: steps.release.outputs.has_changes == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.release.outputs.has_changes == 'true'
+        with:
+          node-version: "24"
+          cache: "pnpm"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: pnpm install --frozen-lockfile
+        if: steps.release.outputs.has_changes == 'true'
+
+      - name: Update version
+        if: steps.release.outputs.has_changes == 'true'
+        run: |
+          CURRENT_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$CURRENT_VERSION" = "$VERSION" ]; then
+            echo "package.json is already at ${VERSION}, skipping version update"
+          else
+            pnpm version "$VERSION" --no-git-tag-version
+            pnpm install --lockfile-only
+          fi
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
+
+      - run: pnpm build
+        if: steps.release.outputs.has_changes == 'true'
+
+      - name: Commit and tag
+        if: steps.release.outputs.has_changes == 'true'
+        run: |
+          VERSION="v${{ steps.release.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json pnpm-lock.yaml
+          git diff --cached --quiet || git commit -m "chore(release): ${VERSION}"
+          if git rev-parse "${VERSION}" >/dev/null 2>&1; then
+            echo "Tag ${VERSION} already exists, skipping"
+          else
+            git tag "${VERSION}"
+          fi
+          git push --follow-tags
+
+      - name: Create GitHub Release
+        if: steps.release.outputs.has_changes == 'true'
+        run: |
+          VERSION="v${{ steps.release.outputs.version }}"
+          if gh release view "${VERSION}" >/dev/null 2>&1; then
+            echo "GitHub Release ${VERSION} already exists, skipping"
+          else
+            gh release create "${VERSION}" --generate-notes --title "${VERSION}"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Check if already published
+        if: steps.release.outputs.has_changes == 'true'
+        id: npm-check
+        run: |
+          VERSION="${{ steps.release.outputs.version }}"
+          if npm view "korea-business-day@${VERSION}" version 2>/dev/null; then
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "v${VERSION} already published to npm, skipping"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.release.outputs.has_changes == 'true' && steps.npm-check.outputs.published == 'false'
+        run: npm publish --provenance --access public
