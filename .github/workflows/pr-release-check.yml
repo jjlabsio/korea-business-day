@@ -1,0 +1,36 @@
+name: PR Release Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-release-intent:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check release intent
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const text = [
+              pr.title || "",
+              pr.body || "",
+              ...(pr.labels || []).map((label) => label.name),
+            ].join("\n");
+
+            const releaseIntent = text.match(
+              /(?:release-version|release|version)\s*:\s*(major|minor|patch|none|\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)/i
+            );
+
+            if (!releaseIntent) {
+              core.setFailed(
+                "PR must declare release intent: release: major|minor|patch|none|x.y.z"
+              );
+              return;
+            }
+
+            core.info(`Release intent: ${releaseIntent[1]}`);
