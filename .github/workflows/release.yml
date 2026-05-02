@@ -184,9 +184,10 @@ jobs:
           if git rev-parse "${VERSION}" >/dev/null 2>&1; then
             echo "Tag ${VERSION} already exists, skipping"
           else
-            git tag "${VERSION}"
+            git tag -a "${VERSION}" -m "${VERSION}"
           fi
-          git push --follow-tags
+          git push origin HEAD:${{ github.ref_name }}
+          git push origin "${VERSION}"
 
       - name: Create GitHub Release
         if: steps.release.outputs.has_changes == 'true'
