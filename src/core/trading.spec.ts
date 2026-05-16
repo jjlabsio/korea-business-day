@@ -17,6 +17,8 @@ describe("trading", () => {
       expect(isTradingDay("2025-01-01")).toEqual(false); // 신정
       expect(isTradingDay("2025-12-31")).toEqual(false); // 연말휴장일
       expect(isTradingDay("2025-08-15")).toEqual(false); // 광복절
+      expect(isTradingDay("2026-06-03")).toEqual(false); // 임시공휴일
+      expect(isTradingDay("2026-07-17")).toEqual(false); // 제헌절
     });
 
     it("평일이고 거래소 휴무일이 아니면 거래일이어야 함", () => {
