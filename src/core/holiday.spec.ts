@@ -114,6 +114,14 @@ describe("holiday", () => {
         date: "2026-05-25",
         name: "석가탄신일(대체휴일)",
       });
+      expect(getHolidays("2026")).toContainEqual({
+        date: "2026-06-03",
+        name: "임시공휴일",
+      });
+      expect(getHolidays("2026")).toContainEqual({
+        date: "2026-07-17",
+        name: "제헌절",
+      });
     });
 
     it("지원하지 않는 연도에 대해서는 빈 배열을 반환해야 함", () => {
@@ -162,6 +170,14 @@ describe("holiday", () => {
       expect(getTradingHolidays("2026")).toContainEqual({
         date: "2026-12-31",
         name: "연말휴장일",
+      });
+      expect(getTradingHolidays("2026")).toContainEqual({
+        date: "2026-06-03",
+        name: "임시공휴일",
+      });
+      expect(getTradingHolidays("2026")).toContainEqual({
+        date: "2026-07-17",
+        name: "제헌절",
       });
     });
 
